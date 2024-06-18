@@ -18,7 +18,7 @@ namespace Dummy_Client
             try
             {
                 socket.Connect(endPoint);
-                Console.WriteLine($"COnnected To {socket.RemoteEndPoint.ToString()}");
+                Console.WriteLine($"Connected To {socket.RemoteEndPoint.ToString()}");
 
                 byte[] sendBuff = Encoding.UTF8.GetBytes("Connect Server");
                 int sendBytes = socket.Send(sendBuff);
