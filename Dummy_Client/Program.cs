@@ -13,34 +13,35 @@ namespace Dummy_Client
             IPAddress ipAddr = ipHost.AddressList[0];
             IPEndPoint endPoint = new IPEndPoint(ipAddr, 7777);
 
-            Socket socket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-
-            try
+            while (true)
             {
-                socket.Connect(endPoint);
-                Console.WriteLine($"Connected To {socket.RemoteEndPoint.ToString()}");
+                Socket socket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
-                byte[] sendBuff = Encoding.UTF8.GetBytes("Connect Server");
-                int sendBytes = socket.Send(sendBuff);
+                try
+                {
+                    socket.Connect(endPoint);
+                    Console.WriteLine($"Connected To {socket.RemoteEndPoint.ToString()}");
 
-                byte[] recvBuff = new byte[1024];
-                int recvBytes = socket.Receive(recvBuff);
-                string recvData = Encoding.UTF8.GetString(recvBuff, 0, recvBytes);
+                    byte[] sendBuff = Encoding.UTF8.GetBytes("Connect Server");
+                    int sendBytes = socket.Send(sendBuff);
 
-                Console.WriteLine($"[From Server]{recvData}");
+                    byte[] recvBuff = new byte[1024];
+                    int recvBytes = socket.Receive(recvBuff);
+                    string recvData = Encoding.UTF8.GetString(recvBuff, 0, recvBytes);
 
-                socket.Shutdown(SocketShutdown.Both);
-                socket.Close();
+                    Console.WriteLine($"[From Server]{recvData}");
+
+                    socket.Shutdown(SocketShutdown.Both);
+                    socket.Close();
 
 
+                }
+                catch (SocketException e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+                Thread.Sleep(100);
             }
-            catch (SocketException e)
-            {
-                Console.WriteLine(e.Message);
-            }
-
- 
-
         }
     }
 }

@@ -42,7 +42,6 @@ namespace Tcp_Server_Core
             Console.WriteLine("Listening...");
 
 
-
             while (true)
             {
 

@@ -32,7 +32,7 @@ namespace Tcp_Server_Core
             args.AcceptSocket = null;
 
             bool pending = _listenSocket.AcceptAsync(args);
-            if (!pending)
+            if (pending==false)
             {
                 OnAcceptCompleted(null, args);
             }
@@ -49,6 +49,7 @@ namespace Tcp_Server_Core
                 else
                     Console.WriteLine(args.SocketError.ToString());
 
+                RegisterAccept(args);
             }
             catch(Exception e)
             {
@@ -58,7 +59,6 @@ namespace Tcp_Server_Core
 
         public Socket Accept()
         {
-
              return _listenSocket.Accept();
         }
 
