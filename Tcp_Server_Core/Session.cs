@@ -10,6 +10,7 @@ namespace Tcp_Server_Core
     class Session
     {
         Socket _socket;
+        int _disconnected = 0;
 
         public void Start(Socket socket)
         {
@@ -31,6 +32,9 @@ namespace Tcp_Server_Core
 
         public void Disconnect()
         {
+            if(Interlocked.Exchange(ref _disconnected, 1) == 1)  //끊긴 상태 확인, 멀티스레드 상황에서의 충돌방지
+                return;         
+    
             _socket.Shutdown(SocketShutdown.Both);
             _socket.Close();
         }
