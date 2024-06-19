@@ -23,6 +23,8 @@ namespace Tcp_Server_Core
             args.RemoteEndPoint = endPoint;
             args.UserToken = socket;
 
+            RegisterConnect(args);
+
         }
 
         void RegisterConnect(SocketAsyncEventArgs args)
