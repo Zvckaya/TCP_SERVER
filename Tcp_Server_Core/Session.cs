@@ -17,20 +17,20 @@ namespace Tcp_Server_Core
         object _lock = new object();
 
         SocketAsyncEventArgs _sendArgs = new SocketAsyncEventArgs();
+        SocketAsyncEventArgs _recvArgs = new SocketAsyncEventArgs();
 
         public void Start(Socket socket)
         {
             _socket = socket;
-            SocketAsyncEventArgs recvArgs = new SocketAsyncEventArgs();
-            recvArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnRecvCompleted);
+            _recvArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnRecvCompleted);
             // recvArgs.AcceptSocket(socket); 리스너 전용 
-            recvArgs.SetBuffer(new byte[1024], 0, 1024);
+            _recvArgs.SetBuffer(new byte[1024], 0, 1024);
 
 
             _sendArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnSendCompleted);
 
 
-            RegisterRecv(recvArgs);
+            RegisterRecv();
 
         }
 
@@ -62,7 +62,7 @@ namespace Tcp_Server_Core
             //RegisterSend는 Send를 통해 Lock을 걸어놓아, 따로 lock처리가 필요없음.
             _pending = true;   //예약 
             byte[] buff = _sendQueue.Dequeue();
-            _sendArgs.SetBuffer(buff, 0, buff.Length);
+            _sendArgs.SetBuffer(buff, 0, buff.Length); //실제 데이터가 있는 버퍼 
 
             bool pending = _socket.SendAsync(_sendArgs); //재사용 가능한 현태 
             if (pending == false)
@@ -101,11 +101,11 @@ namespace Tcp_Server_Core
                    
         }
 
-        void RegisterRecv(SocketAsyncEventArgs args)
+        void RegisterRecv( )
         {
-            bool pending = _socket.ReceiveAsync(args);
+            bool pending = _socket.ReceiveAsync(_recvArgs);
             if (pending == false)
-                OnRecvCompleted(null, args);
+                OnRecvCompleted(null, _recvArgs);
         }
 
         void OnRecvCompleted(object sender, SocketAsyncEventArgs args)
@@ -116,7 +116,7 @@ namespace Tcp_Server_Core
                 {
                     string recvData = Encoding.UTF8.GetString(args.Buffer, args.Offset, args.BytesTransferred);
                     Console.WriteLine($"[From Client] {recvData}");
-                    RegisterRecv(args); //다시 재등록 
+                    RegisterRecv(); //다시 재등록 
                 }
                 catch (Exception e)
                 {
