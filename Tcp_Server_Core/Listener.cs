@@ -20,8 +20,8 @@ namespace Tcp_Server_Core
             _onAcceptHandler += onAcceptHandler;
 
             _listenSocket.Bind(endPoint);
-            _listenSocket.Listen(10);
-
+            _listenSocket.Listen(10);  //10개의 리스너 생성제한으로 pending false만 나올수가 없음.
+             
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
             args.Completed += new EventHandler<SocketAsyncEventArgs>(OnAcceptCompleted);   
             RegisterAccept(args);   
@@ -40,21 +40,16 @@ namespace Tcp_Server_Core
 
         void OnAcceptCompleted(object sender, SocketAsyncEventArgs args)
         {
-            try
-            {
-                if (args.SocketError == SocketError.Success)
+          
+                if (args.SocketError == SocketError.Success)  // AcceptAsync를 사용하여 자동으로 별도의 스레
                 {
                     _onAcceptHandler.Invoke(args.AcceptSocket);
                 }
                 else
                     Console.WriteLine(args.SocketError.ToString());
 
-                RegisterAccept(args);
-            }
-            catch(Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
+                RegisterAccept(args); 
+           
         }
 
         public Socket Accept()
