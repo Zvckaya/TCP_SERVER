@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Tcp_Server_Core
 {
-    class Listener
+    public class Listener
     {
         Socket _listenSocket;
         Func<Session> _sessionFactory;

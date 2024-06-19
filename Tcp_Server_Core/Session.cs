@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Tcp_Server_Core
 {
-    abstract class Session
+    public abstract class Session
     {
         Socket _socket;
         int _disconnected = 0;
