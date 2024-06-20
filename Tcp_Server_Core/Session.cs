@@ -13,6 +13,8 @@ namespace Tcp_Server_Core
         Socket _socket;
         int _disconnected = 0;
 
+
+
         Queue<byte[]> _sendQueue = new Queue<byte[]>();
         object _lock = new object();
 
@@ -30,8 +32,8 @@ namespace Tcp_Server_Core
         {
             _socket = socket;
             _recvArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnRecvCompleted);
-            // recvArgs.AcceptSocket(socket); 리스너 전용 
             _recvArgs.SetBuffer(new byte[1024], 0, 1024);
+
             _sendArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnSendCompleted);
             RegisterRecv();
 
