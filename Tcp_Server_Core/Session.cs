@@ -15,7 +15,7 @@ namespace Tcp_Server_Core
         RecvBuffer _recvBuffer = new RecvBuffer(1024);
 
 
-        Queue<byte[]> _sendQueue = new Queue<byte[]>();
+        Queue<ArraySegment<byte>> _sendQueue = new Queue<ArraySegment<byte>>();
         object _lock = new object();
 
 
@@ -38,7 +38,7 @@ namespace Tcp_Server_Core
 
         }
 
-        public void Send(byte[] sendBuff)
+        public void Send(ArraySegment<byte> sendBuff)
         {
             lock (_lock)  //동시에 Send를 호출 했을때, 큐에 넣는 작업을 동기화 시킴
             {
@@ -67,8 +67,8 @@ namespace Tcp_Server_Core
         {
             while (_sendQueue.Count > 0)
             {
-                byte[] buff = _sendQueue.Dequeue();
-                _pendingList.Add(new ArraySegment<byte>(buff, 0, buff.Length)); //List에 추가
+                ArraySegment<byte> buff = _sendQueue.Dequeue();
+                _pendingList.Add(buff); //List에 추가
             }
             _sendArgs.BufferList = _pendingList;
 

@@ -8,6 +8,7 @@ namespace Tcp_Server_Core
 {
     public class RecvBuffer
     {
+        //세션마다 리시브 버퍼 1개씩 가짐
 
         ArraySegment<byte> _buffer;
         int _readPos;  //컨텐츠코드에서 결정

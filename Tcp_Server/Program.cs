@@ -5,6 +5,14 @@ using Tcp_Server_Core;
 
 namespace Tcp_Server
 {
+    class Knight
+    {
+        public int hp;
+        public int attack;
+        public string name;
+        public List<int> skills = new List<int>();
+    }
+
     class GameSession : Session
     {
         //왜 구현하는가 ? 엔진과 컨텐츠를 분리하기 위함 
@@ -12,9 +20,20 @@ namespace Tcp_Server
         public override void OnConnected(EndPoint endPoint)
         {
 
-            Console.WriteLine($"On Connected :{endPoint}");
-            byte[] sendBuff = Encoding.UTF8.GetBytes("Welcome to Server");
+            Console.WriteLine($"OnConnected : {endPoint}");
+
+            Knight knight = new Knight() { hp = 100, attack = 10 };
+;
+            ArraySegment<byte> openSegment =  SendBufferHelper.Open(4096);
+            byte[] buffer = BitConverter.GetBytes(knight.hp);
+            byte[] buffer2 = BitConverter.GetBytes(knight.attack);
+
+            Array.Copy(buffer, 0, openSegment.Array, openSegment.Offset, buffer.Length);
+            Array.Copy(buffer2, 0, openSegment.Array, openSegment.Offset + buffer.Length, buffer2.Length);
+            ArraySegment<byte> sendBuff =  SendBufferHelper.Close(buffer.Length + buffer2.Length);
+
             Send(sendBuff);
+
             Thread.Sleep(1000);
             Disconnect();
         }
