@@ -34,31 +34,42 @@ namespace Dummy_Client
 
     class ServerSession : Session
     {
+
+
+
         public override void OnConnected(EndPoint endPoint)
         {
 
             Console.WriteLine($"On Connected :{endPoint}");
-
-            PlayerInfoReq packet = new PlayerInfoReq() { size = 4, packetId = (ushort)PacketID.PlayerInfoReq, playerId = 1001 };
-
+         
+            PlayerInfoReq packet = new PlayerInfoReq() {  packetId = (ushort)PacketID.PlayerInfoReq, playerId = 1001 };
 
             ArraySegment<byte> s = SendBufferHelper.Open(4096); //사이즈 예약
-
-            byte[] size = BitConverter.GetBytes(packet.size); //2
-            byte[] packetId = BitConverter.GetBytes(packet.packetId); //2
-            byte[] playerId = BitConverter.GetBytes(packet.playerId);  //8
-
+            bool success = true;
             ushort count = 0;
 
-            Array.Copy(size, 0, s.Array, s.Offset + 0, 2);
             count += 2;
-            Array.Copy(packetId, 0, s.Array, s.Offset + count, 2);
-            count+= 2;
-            Array.Copy(playerId, 0, s.Array, s.Offset + count, 8);
+            success &= BitConverter.TryWriteBytes(new Span<byte>(s.Array, s.Offset+count, s.Count-count), packet.packetId); // 공간이 모자르면 실패 
+            count += 2;
+            success &= BitConverter.TryWriteBytes(new Span<byte>(s.Array, s.Offset+count, s.Count-count), packet.playerId); // 공간이 모자르면 실패 
             count += 8;
+
+            success &= BitConverter.TryWriteBytes(new Span<byte>(s.Array, s.Offset, s.Count), count); // 사이즈 적어주기
+
+            //미리 만들어진 버퍼에 복사하지 않고 직접 수정
+
             ArraySegment<byte> sendBuff = SendBufferHelper.Close(count);
 
-            Send(sendBuff);
+
+            if (success)
+            {
+                Send(sendBuff);
+            }
+            else
+            {
+                Console.WriteLine("전송 실패.");
+            }
+         
 
 
         }

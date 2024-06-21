@@ -72,8 +72,6 @@ namespace Tcp_Server
         public override void OnRecvPacket(ArraySegment<byte> buffer)
         {
             ushort count = 0;
-
-
             ushort size = BitConverter.ToUInt16(buffer.Array, buffer.Offset);
             count += 2;
             ushort id = BitConverter.ToUInt16(buffer.Array, buffer.Offset + count);
