@@ -39,19 +39,27 @@ namespace Dummy_Client
 
             Console.WriteLine($"On Connected :{endPoint}");
 
-            Packet packet = new Packet() { size = 4, packetId = 7 };
+            PlayerInfoReq packet = new PlayerInfoReq() { size = 4, packetId = (ushort)PacketID.PlayerInfoReq, playerId = 1001 };
 
-            for (int i = 0; i < 5; i++)
-            {
-                ArraySegment<byte> openSegment = SendBufferHelper.Open(4096);
-                byte[] buffer = BitConverter.GetBytes(packet.size);
-                byte[] buffer2 = BitConverter.GetBytes(packet.packetId);
-                Array.Copy(buffer, 0, openSegment.Array, openSegment.Offset, buffer.Length);
-                Array.Copy(buffer2, 0, openSegment.Array, openSegment.Offset + buffer.Length, buffer2.Length);
-                ArraySegment<byte> sendBuff = SendBufferHelper.Close(packet.size);
 
-                Send(sendBuff);
-            }
+            ArraySegment<byte> s = SendBufferHelper.Open(4096); //사이즈 예약
+
+            byte[] size = BitConverter.GetBytes(packet.size); //2
+            byte[] packetId = BitConverter.GetBytes(packet.packetId); //2
+            byte[] playerId = BitConverter.GetBytes(packet.playerId);  //8
+
+            ushort count = 0;
+
+            Array.Copy(size, 0, s.Array, s.Offset + 0, 2);
+            count += 2;
+            Array.Copy(packetId, 0, s.Array, s.Offset + count, 2);
+            count+= 2;
+            Array.Copy(playerId, 0, s.Array, s.Offset + count, 8);
+            count += 8;
+            ArraySegment<byte> sendBuff = SendBufferHelper.Close(count);
+
+            Send(sendBuff);
+
 
         }
 

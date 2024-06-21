@@ -71,9 +71,32 @@ namespace Tcp_Server
 
         public override void OnRecvPacket(ArraySegment<byte> buffer)
         {
+            ushort count = 0;
+
+
             ushort size = BitConverter.ToUInt16(buffer.Array, buffer.Offset);
-            ushort packetId = BitConverter.ToUInt16(buffer.Array, buffer.Offset + 2);
-            Console.WriteLine($"Recv Size {size} RecvId {packetId}");
+            count += 2;
+            ushort id = BitConverter.ToUInt16(buffer.Array, buffer.Offset + count);
+            count += 2;
+
+            switch ((PacketID)id)
+            {
+                case PacketID.PlayerInfoReq:
+                    {
+                        long playerId = BitConverter.ToInt64(buffer.Array, buffer.Offset + count);
+                        count += 8;
+                        Console.WriteLine($"Player InfoReq: {playerId}");
+                    }
+                    break;
+                case PacketID.PlayerInfoOk:
+                    {
+
+                    }
+                    break;
+
+            }
+
+            Console.WriteLine($"Recv Size {size} RecvId {id}");
         }
 
         public override void OnSend(int numOfBytes)
