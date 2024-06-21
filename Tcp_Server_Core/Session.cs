@@ -183,7 +183,6 @@ namespace Tcp_Server_Core
                         return;
                     }
 
-                        
                     RegisterRecv(); //다시 재등록 
                 }
                 catch (Exception e)
