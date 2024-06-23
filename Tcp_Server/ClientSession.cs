@@ -21,40 +21,61 @@ namespace Tcp_Server
     public class PlayerInfoReq : Packet
     {
         public long playerId;
+        public string name;
+
 
         public PlayerInfoReq()
         {
             this.packetId = (ushort)PacketID.PlayerInfoReq;
         }
 
-        public override void Read(ArraySegment<byte> s)
+        public override void Read(ArraySegment<byte> segment)
         {
-
 
             ushort count = 0;
 
-            //ushort size = BitConverter.ToUInt16(s.Array, s.Offset);
-            count += 2;
-            //ushort id = BitConverter.ToUInt16(s.Array, s.Offset + count);
-            count += 2;
-            this.playerId = BitConverter.ToInt64(new ReadOnlySpan<byte>(s.Array, s.Offset + count, s.Count - count));  //안전한 버전(범위검사)
+            ReadOnlySpan<byte> s = new ReadOnlySpan<byte>(segment.Array, segment.Offset, segment.Count);
 
-            count += 8;
+            count += sizeof(ushort);
+            count += sizeof(ushort);
+            this.playerId = BitConverter.ToInt64(s.Slice(count, s.Length - count));
+            count += sizeof(long);
+
+            ushort nameLen = BitConverter.ToUInt16(s.Slice(count, s.Length - count));
+            count += sizeof(ushort);
+            this.name = Encoding.Unicode.GetString(s.Slice(count, nameLen));
+
+
+
+
         }
 
         public override ArraySegment<byte> Write()
         {
-            ArraySegment<byte> s = SendBufferHelper.Open(4096); //사이즈 예약
+            ArraySegment<byte> segment = SendBufferHelper.Open(4096); //사이즈 예약
             bool success = true;
             ushort count = 0;
 
-            count += 2;
-            success &= BitConverter.TryWriteBytes(new Span<byte>(s.Array, s.Offset + count, s.Count - count), this.packetId); // 공간이 모자르면 실패 
-            count += 2;
-            success &= BitConverter.TryWriteBytes(new Span<byte>(s.Array, s.Offset + count, s.Count - count), this.playerId); // 공간이 모자르면 실패 
-            count += 8;
+            Span<byte> s = new Span<byte>(segment.Array, segment.Offset, segment.Count);
 
-            success &= BitConverter.TryWriteBytes(new Span<byte>(s.Array, s.Offset, s.Count), count); // 사이즈 적어주기
+            //count 
+
+            count += sizeof(ushort);
+            success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), this.packetId); // 공간이 모자르면 실패 
+            count += sizeof(ushort);
+            success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), this.playerId); // 공간이 모자르면 실패 
+            count += sizeof(long);
+
+            // string 의 len 알아내기 -> byte[]로 변환해 직렬화
+
+            ushort nameLen = (ushort)Encoding.Unicode.GetByteCount(this.name);
+            success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), nameLen); //byte 배열의 정확한 크기로 buffer에 삽입
+            count += sizeof(ushort);
+            Array.Copy(Encoding.Unicode.GetBytes(this.name), 0, segment.Array, count, nameLen); // 
+            count += nameLen;
+
+            //최종 카운트 기입
+            success &= BitConverter.TryWriteBytes(s, count); // 사이즈 적어주기
 
             if (success == false)
                 return null;
@@ -71,7 +92,6 @@ namespace Tcp_Server
         PlayerInfoReq = 1,
         PlayerInfoOk = 2
     }
-
 
     class ClientSession : PacketSession
     {
@@ -125,7 +145,7 @@ namespace Tcp_Server
                     {
                         PlayerInfoReq p = new PlayerInfoReq();
                         p.Read(buffer);
-                        Console.WriteLine($"Player InfoReq: {p.playerId}");
+                        Console.WriteLine($"Player InfoReq: {p.playerId} {p.name}");
                     }
                     break;
                 case PacketID.PlayerInfoOk:
