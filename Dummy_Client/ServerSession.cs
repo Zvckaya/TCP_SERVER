@@ -12,45 +12,46 @@ namespace Dummy_Client
 
    
 
-    public struct SkillInfo
-    {
-        public int id;
-        public short level;
-        public float duration;
-
-        public bool Write(Span<byte> s, ref ushort count)
-        {
-            bool success = true;
-            success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), id);
-            count += sizeof(int);
-            success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), level);
-            count += sizeof(short);
-            success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), duration);
-            count += sizeof(float);
-
-            return true;
-        }
-
-        public void Read(ReadOnlySpan<byte> s, ref ushort count)
-        {
-            id = BitConverter.ToInt32(s.Slice(count, s.Length - count));
-            count += sizeof(int);
-            level = BitConverter.ToInt16(s.Slice(count, s.Length - count));
-            count += sizeof(short);
-            duration = BitConverter.ToSingle(s.Slice(count, s.Length - count));
-            count += sizeof(float);
-        }
-
-
-    }
-
+   
 
     public class PlayerInfoReq 
     {
         public long playerId;
         public string name;
 
-      
+        public struct SkillInfo
+        {
+            public int id;
+            public short level;
+            public float duration;
+
+            public bool Write(Span<byte> s, ref ushort count)
+            {
+                bool success = true;
+                success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), id);
+                count += sizeof(int);
+                success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), level);
+                count += sizeof(short);
+                success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), duration);
+                count += sizeof(float);
+
+                return true;
+            }
+
+            public void Read(ReadOnlySpan<byte> s, ref ushort count)
+            {
+                id = BitConverter.ToInt32(s.Slice(count, s.Length - count));
+                count += sizeof(int);
+                level = BitConverter.ToInt16(s.Slice(count, s.Length - count));
+                count += sizeof(short);
+                duration = BitConverter.ToSingle(s.Slice(count, s.Length - count));
+                count += sizeof(float);
+            }
+
+
+        }
+
+
 
         // public List<int> skills = new List<int>(); // 
 
@@ -143,13 +144,13 @@ namespace Dummy_Client
             Console.WriteLine($"On Connected :{endPoint}");
          
             PlayerInfoReq packet = new PlayerInfoReq() { playerId = 1001,name="ABCD" };
-            packet.skills.Add(new SkillInfo() { id = 101, level = 1, duration = 3.0f });
+            packet.skills.Add(new PlayerInfoReq.SkillInfo() { id = 101, level = 1, duration = 3.0f });
 
-            packet.skills.Add(new SkillInfo() { id = 102, level = 2, duration = 3.0f });
+            packet.skills.Add(new PlayerInfoReq.SkillInfo() { id = 102, level = 2, duration = 3.0f });
 
-            packet.skills.Add(new SkillInfo() { id = 103, level = 3, duration = 3.0f });
+            packet.skills.Add(new PlayerInfoReq.SkillInfo() { id = 103, level = 3, duration = 3.0f });
 
-            packet.skills.Add(new SkillInfo() { id = 104, level = 4, duration = 3.0f });
+            packet.skills.Add(new PlayerInfoReq.SkillInfo() { id = 104, level = 4, duration = 3.0f });
 
             ArraySegment<byte> s=  packet.Write();
 
