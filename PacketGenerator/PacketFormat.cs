@@ -60,7 +60,7 @@ public {0}
         //{1} 변수이름
 
         public static string memberFormat =
-@"public {0} {1}";
+@"public {0} {1};";
 
         //{0} 변수이름
         //{1} To~ 변수형식
@@ -82,9 +82,11 @@ count += {0}Len;
         //{1} 변수형식
         public static string writeFormat =
 @"
-success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), this.{0); 
+success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), this.{0}); 
 count += sizeof({1});
 ";
+
+
         //{0} 변수이름
         //{1} 변수형식
 

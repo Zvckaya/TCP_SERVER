@@ -20,7 +20,7 @@ namespace PacketGenerator
                 r.MoveToContent();
                 while (r.Read())
                 {
-                  if (r.Depth == 1 && r.NodeType == XmlNodeType.Element)
+                    if (r.Depth == 1 && r.NodeType == XmlNodeType.Element)
                         ParsePack(r);
 
                 }
@@ -47,12 +47,13 @@ namespace PacketGenerator
                 return;
             }
 
-            Tuple<string,string,string> t = ParseMembers(r);
-            genPacket += string.Format(PacketFormat.packetFomat, packetName, t.Item1, t.Item2,t.Item3);
-            
+            Tuple<string, string, string> t = ParseMembers(r);
+            genPacket += string.Format(PacketFormat.packetFomat, packetName, t.Item1, t.Item2, t.Item3);
+
         }
 
-        public static Tuple<string,string,string> ParseMembers(XmlReader r) { 
+        public static Tuple<string, string, string> ParseMembers(XmlReader r)
+        {
             string packetName = r["name"];
 
             string memberCode = "";
@@ -75,7 +76,7 @@ namespace PacketGenerator
                     return null;
                 }
 
-                if(string.IsNullOrEmpty(memberCode)==false)
+                if (string.IsNullOrEmpty(memberCode) == false)
                 {
                     memberCode += Environment.NewLine;
                 }
@@ -88,7 +89,7 @@ namespace PacketGenerator
                     memberCode += Environment.NewLine;
                 }
 
-                string memberType= r.Name.ToLower();
+                string memberType = r.Name.ToLower();
                 switch (memberType)
                 {
                     case "bool":
@@ -99,10 +100,10 @@ namespace PacketGenerator
                     case "long":
                     case "float":
                     case "double":
-                        memberCode += string.Format(PacketFormat.memberFormat,memberType,memberName);
+                        memberCode += string.Format(PacketFormat.memberFormat, memberType, memberName);
                         readCode += string.Format(PacketFormat.readFormat, memberName, ToMemberType(memberType), memberType);
                         writeCode += string.Format(PacketFormat.writeFormat, memberName, memberType);
-                        break;
+                        break;  
                     case "string":
                         memberCode += string.Format(PacketFormat.memberFormat, memberType, memberName);
                         readCode += string.Format(PacketFormat.readStringFormat, memberName);
@@ -118,6 +119,9 @@ namespace PacketGenerator
 
             }
 
+            memberCode = memberCode.Replace("\n", "\n\t");
+            readCode = readCode.Replace("\n", "\n\t\t");
+            writeCode = writeCode.Replace("\n","\n\t\t");
             return new Tuple<string, string, string>(memberCode, readCode, writeCode);
         }
 
@@ -127,7 +131,6 @@ namespace PacketGenerator
             {
                 case "bool":
                     return "ToBoolean";
-                
                 case "short":
                     return "ToInt16";
                 case "ushort":
