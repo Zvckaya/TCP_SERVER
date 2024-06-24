@@ -69,11 +69,17 @@ namespace Dummy_Client
 
             // string 의 len 알아내기 -> byte[]로 변환해 직렬화
 
-            ushort nameLen =  (ushort)Encoding.Unicode.GetByteCount(this.name);  
-            success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), nameLen); //byte 배열의 정확한 크기로 buffer에 삽입
+            //ushort nameLen =  (ushort)Encoding.Unicode.GetByteCount(this.name);  
+            //success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), nameLen); //byte 배열의 정확한 크기로 buffer에 삽입
+            //count += sizeof(ushort);
+            //Array.Copy(Encoding.Unicode.GetBytes(this.name), 0, segment.Array,count,nameLen); // 
+            //count += nameLen;
+
+            ushort nameLen = (ushort)Encoding.Unicode.GetBytes(this.name, 0, this.name.Length, segment.Array, segment.Offset + count+sizeof(ushort));
+            success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), nameLen);
             count += sizeof(ushort);
-            Array.Copy(Encoding.Unicode.GetBytes(this.name), 0, segment.Array,count,nameLen); // 
             count += nameLen;
+            
 
             //최종 카운트 기입
             success &= BitConverter.TryWriteBytes(s, count); // 사이즈 적어주기
@@ -82,7 +88,6 @@ namespace Dummy_Client
                 return null;
 
             //복사배열 생성이 아닌 미리 만들어진 버퍼로 관리
-
             ArraySegment<byte> sendBuff = SendBufferHelper.Close(count);
             return sendBuff;
         }
