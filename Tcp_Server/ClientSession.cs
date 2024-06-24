@@ -9,6 +9,7 @@ using Tcp_Server_Core;
 
 namespace Tcp_Server
 {
+
     public abstract class Packet  //패킷 헤더
     {
         public ushort size;
@@ -23,6 +24,42 @@ namespace Tcp_Server
         public long playerId;
         public string name;
 
+        public struct SkillInfo
+        {
+            public int id;
+            public short level;
+            public float duration;
+
+            public bool Write(Span<byte> s, ref ushort count)
+            {
+                bool success = true;
+                success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), id);
+                count += sizeof(int);
+                success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), level);
+                count += sizeof(short);
+                success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), duration);
+                count += sizeof(float);
+
+                return true;
+            }
+
+            public void Read(ReadOnlySpan<byte> s, ref ushort count)
+            {
+                id = BitConverter.ToInt32(s.Slice(count, s.Length - count));
+                count += sizeof(int);
+                level = BitConverter.ToInt16(s.Slice(count, s.Length - count));
+                count += sizeof(short);
+                duration = BitConverter.ToSingle(s.Slice(count, s.Length - count));
+                count += sizeof(float);
+            }
+
+
+        }
+
+
+        // public List<int> skills = new List<int>(); // 
+
+        public List<SkillInfo> skills = new List<SkillInfo>();
 
         public PlayerInfoReq()
         {
@@ -41,9 +78,22 @@ namespace Tcp_Server
             this.playerId = BitConverter.ToInt64(s.Slice(count, s.Length - count));
             count += sizeof(long);
 
+            //string
             ushort nameLen = BitConverter.ToUInt16(s.Slice(count, s.Length - count));
             count += sizeof(ushort);
             this.name = Encoding.Unicode.GetString(s.Slice(count, nameLen));
+            count += nameLen;
+
+            //skill list
+            skills.Clear();
+            ushort skillLen = BitConverter.ToUInt16(s.Slice(count, s.Length - count));  //스킬이 몇개?
+            count += sizeof(ushort);
+            for (int i = 0; i < skillLen; i++)
+            {
+                SkillInfo skill = new SkillInfo();
+                skill.Read(s, ref count);
+                skills.Add(skill);
+            }
 
 
 
@@ -79,6 +129,13 @@ namespace Tcp_Server
             count += sizeof(ushort);
             count += nameLen;
 
+            success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), (ushort)skills.Count);
+            count += sizeof(ushort);
+            foreach (SkillInfo skill in skills)
+            {
+                success &= skill.Write(s, ref count);
+            }
+
 
             //최종 카운트 기입
             success &= BitConverter.TryWriteBytes(s, count); // 사이즈 적어주기
@@ -97,6 +154,7 @@ namespace Tcp_Server
         PlayerInfoReq = 1,
         PlayerInfoOk = 2
     }
+
 
     class ClientSession : PacketSession
     {
@@ -151,6 +209,11 @@ namespace Tcp_Server
                         PlayerInfoReq p = new PlayerInfoReq();
                         p.Read(buffer);
                         Console.WriteLine($"Player InfoReq: {p.playerId} {p.name}");
+
+                        foreach(PlayerInfoReq.SkillInfo skill in p.skills)
+                        {
+                            Console.WriteLine($"Skill({skill.id}) ({skill.level}) ({skill.duration})");
+                        }
                     }
                     break;
                 case PacketID.PlayerInfoOk:
