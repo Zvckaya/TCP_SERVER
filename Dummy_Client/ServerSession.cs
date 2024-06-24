@@ -10,14 +10,7 @@ using Tcp_Server_Core;
 namespace Dummy_Client
 {  //세션은 대리자의 개념이다.
 
-    public abstract class Packet  //패킷 헤더
-    {
-        public ushort size;
-        public ushort packetId;
-
-        public abstract ArraySegment<byte> Write();
-        public abstract void Read(ArraySegment<byte> s);
-    }
+   
 
     public struct SkillInfo
     {
@@ -52,7 +45,7 @@ namespace Dummy_Client
     }
 
 
-    public class PlayerInfoReq : Packet
+    public class PlayerInfoReq 
     {
         public long playerId;
         public string name;
@@ -63,12 +56,9 @@ namespace Dummy_Client
 
         public List<SkillInfo> skills = new List<SkillInfo>();
         
-        public PlayerInfoReq()
-        {
-            this.packetId = (ushort)PacketID.PlayerInfoReq;
-        }
 
-        public override void Read(ArraySegment<byte> segment)
+
+        public  void Read(ArraySegment<byte> segment)
         {
 
             ushort count = 0;
@@ -98,29 +88,19 @@ namespace Dummy_Client
             }
         }
          
-        public override ArraySegment<byte> Write()
+        public  ArraySegment<byte> Write()
         {
             ArraySegment<byte> segment = SendBufferHelper.Open(4096); //사이즈 예약
             bool success = true;
             ushort count = 0;
 
             Span<byte> s = new Span<byte>(segment.Array, segment.Offset, segment.Count);
-
             //count 
-
             count += sizeof(ushort);
-            success &= BitConverter.TryWriteBytes(s.Slice(count,s.Length - count), this.packetId); // 공간이 모자르면 실패 
+            success &= BitConverter.TryWriteBytes(s.Slice(count,s.Length - count), (ushort)PacketID.PlayerInfoReq); // 공간이 모자르면 실패 
             count += sizeof(ushort);
             success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), this.playerId); // 공간이 모자르면 실패 
             count += sizeof(long);
-
-            // string 의 len 알아내기 -> byte[]로 변환해 직렬화
-
-            //ushort nameLen =  (ushort)Encoding.Unicode.GetByteCount(this.name);  
-            //success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), nameLen); //byte 배열의 정확한 크기로 buffer에 삽입
-            //count += sizeof(ushort);
-            //Array.Copy(Encoding.Unicode.GetBytes(this.name), 0, segment.Array,count,nameLen); // 
-            //count += nameLen;
 
             ushort nameLen = (ushort)Encoding.Unicode.GetBytes(this.name, 0, this.name.Length, segment.Array, segment.Offset + count+sizeof(ushort));
             success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), nameLen);
@@ -133,7 +113,6 @@ namespace Dummy_Client
             {
                 success &= skill.Write(s, ref count);
             }
-
 
             //최종 카운트 기입
             success &= BitConverter.TryWriteBytes(s, count); // 사이즈 적어주기
