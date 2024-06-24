@@ -88,7 +88,7 @@ count += sizeof({1});
         //{0} 변수이름
         //{1} 변수형식
 
-        public static string wrtieStringFormat =
+        public static string writeStringFormat =
 @"
 ushort {0}Len = (ushort)Encoding.Unicode.GetBytes(this.{0}, 0, this.{0}.Length, segment.Array, segment.Offset + count+sizeof(ushort));
 success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), {0}Len);
