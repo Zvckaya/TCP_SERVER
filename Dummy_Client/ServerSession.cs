@@ -10,9 +10,16 @@ using Tcp_Server_Core;
 namespace Dummy_Client
 {  //세션은 대리자의 개념이다.
 
+    public enum PacketID
+    {
+
+        PlayerInfoReq = 1,
 
 
+        Test = 2,
 
+
+    }
 
 
     public class PlayerInfoReq
@@ -34,12 +41,50 @@ namespace Dummy_Client
 
             public float duration;
 
+
+            public Skill() { }
+
+            public class Attribute
+            {
+                public int att;
+
+                public void Read(ReadOnlySpan<byte> s, ref ushort count)
+                {
+                    this.att = BitConverter.ToInt32(s.Slice(count, s.Length - count));
+                    count += sizeof(int);
+                }
+
+                public bool Write(Span<byte> s, ref ushort count)
+                {
+                    bool success = true;
+
+                    success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), this.att);
+                    count += sizeof(int);
+
+                    return true;
+                }
+            }
+
+            public List<Attribute> attributes = new List<Attribute>();
+
+
             public void Read(ReadOnlySpan<byte> s, ref ushort count)
             {
                 this.id = BitConverter.ToInt32(s.Slice(count, s.Length - count));
                 count += sizeof(int); this.level = BitConverter.ToInt16(s.Slice(count, s.Length - count));
                 count += sizeof(short); this.duration = BitConverter.ToSingle(s.Slice(count, s.Length - count));
                 count += sizeof(float);
+                attributes.Clear();
+                ushort attributeLen = BitConverter.ToUInt16(s.Slice(count, s.Length - count));
+                count += sizeof(ushort);
+                for (int i = 0; i < attributeLen; i++)
+                {
+                    Attribute attribute = new Attribute();
+                    attribute.Read(s, ref count);
+                    attributes.Add(attribute);
+                }
+
+
             }
 
             public bool Write(Span<byte> s, ref ushort count)
@@ -54,6 +99,13 @@ namespace Dummy_Client
 
                 success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), this.duration);
                 count += sizeof(float);
+
+                success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), (ushort)this.attributes.Count);
+                count += sizeof(ushort);
+                foreach (Attribute attribute in this.attributes)
+                {
+                    success &= attribute.Write(s, ref count);
+                }
 
                 return true;
             }
@@ -132,11 +184,8 @@ namespace Dummy_Client
     }
 
 
-    public enum PacketID
-    {
-        PlayerInfoReq = 1,
-        PlayerInfoOk = 2
-    }
+
+
 
     class ServerSession : Session
     {
@@ -149,12 +198,12 @@ namespace Dummy_Client
             Console.WriteLine($"On Connected :{endPoint}");
 
             PlayerInfoReq packet = new PlayerInfoReq() { playerId = 1001, name = "ABCD" };
+            var skill = new PlayerInfoReq.Skill() { id = 105, level = 5, duration = 3.0f };
+            skill.attributes.Add(new PlayerInfoReq.Skill.Attribute(){att=77});
+            packet.skills.Add(skill);
             packet.skills.Add(new PlayerInfoReq.Skill() { id = 101, level = 1, duration = 3.0f });
-
             packet.skills.Add(new PlayerInfoReq.Skill() { id = 102, level = 2, duration = 3.0f });
-
             packet.skills.Add(new PlayerInfoReq.Skill() { id = 103, level = 3, duration = 3.0f });
-
             packet.skills.Add(new PlayerInfoReq.Skill() { id = 104, level = 4, duration = 3.0f });
 
             ArraySegment<byte> s = packet.Write();

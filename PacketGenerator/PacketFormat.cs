@@ -33,7 +33,7 @@ public enum PacketID
         //{1} 패킷 번호
         public static string packetEnumFormat =
 @"
-{0} = {1};
+{0} = {1},
 ";
 
         // {0} 패킷 이름

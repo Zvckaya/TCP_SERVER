@@ -20,6 +20,18 @@ namespace Tcp_Server
     }
 
 
+    public enum PacketID
+    {
+
+        PlayerInfoReq = 1,
+
+
+        Test = 2,
+
+
+    }
+
+
     public class PlayerInfoReq
     {
         public long playerId;
@@ -39,12 +51,50 @@ namespace Tcp_Server
 
             public float duration;
 
+
+            public Skill() { }
+
+            public class Attribute
+            {
+                public int att;
+
+                public void Read(ReadOnlySpan<byte> s, ref ushort count)
+                {
+                    this.att = BitConverter.ToInt32(s.Slice(count, s.Length - count));
+                    count += sizeof(int);
+                }
+
+                public bool Write(Span<byte> s, ref ushort count)
+                {
+                    bool success = true;
+
+                    success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), this.att);
+                    count += sizeof(int);
+
+                    return true;
+                }
+            }
+
+            public List<Attribute> attributes = new List<Attribute>();
+
+
             public void Read(ReadOnlySpan<byte> s, ref ushort count)
             {
                 this.id = BitConverter.ToInt32(s.Slice(count, s.Length - count));
                 count += sizeof(int); this.level = BitConverter.ToInt16(s.Slice(count, s.Length - count));
                 count += sizeof(short); this.duration = BitConverter.ToSingle(s.Slice(count, s.Length - count));
                 count += sizeof(float);
+                attributes.Clear();
+                ushort attributeLen = BitConverter.ToUInt16(s.Slice(count, s.Length - count));
+                count += sizeof(ushort);
+                for (int i = 0; i < attributeLen; i++)
+                {
+                    Attribute attribute = new Attribute();
+                    attribute.Read(s, ref count);
+                    attributes.Add(attribute);
+                }
+
+
             }
 
             public bool Write(Span<byte> s, ref ushort count)
@@ -59,6 +109,13 @@ namespace Tcp_Server
 
                 success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), this.duration);
                 count += sizeof(float);
+
+                success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), (ushort)this.attributes.Count);
+                count += sizeof(ushort);
+                foreach (Attribute attribute in this.attributes)
+                {
+                    success &= attribute.Write(s, ref count);
+                }
 
                 return true;
             }
@@ -136,13 +193,6 @@ namespace Tcp_Server
         }
     }
 
-    public enum PacketID
-    {
-        PlayerInfoReq = 1,
-        PlayerInfoOk = 2
-    }
-
-
     class ClientSession : PacketSession
     {
         //왜 구현하는가 ? 엔진과 컨텐츠를 분리하기 위함 
@@ -203,11 +253,8 @@ namespace Tcp_Server
                         }
                     }
                     break;
-                case PacketID.PlayerInfoOk:
-                    {
-
-                    }
-                    break;
+                default:
+                    return;
 
             }
 
