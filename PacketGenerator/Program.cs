@@ -5,7 +5,12 @@ namespace PacketGenerator
 {
     class Program
     {
-        static string genPacket;
+        
+        static string genPackets;
+        static ushort packetId;
+        static string packetEnum;
+
+
 
         static void Main(string[] args)
         {
@@ -21,14 +26,15 @@ namespace PacketGenerator
                 while (r.Read())
                 {
                     if (r.Depth == 1 && r.NodeType == XmlNodeType.Element)
-                        ParsePack(r);
+                        ParsePacket(r);
                 }
 
-                File.WriteAllText("GenPackets.cs", genPacket);
+                string fileText = string.Format(PacketFormat.fileFormat, packetEnum, genPackets);
+                File.WriteAllText("GenPackets.cs", fileText);
             }
         }
 
-        public static void ParsePack(XmlReader r)
+        public static void ParsePacket(XmlReader r)
         {
             if (r.NodeType == XmlNodeType.EndElement)
                 return;
@@ -47,8 +53,8 @@ namespace PacketGenerator
             }
 
             Tuple<string, string, string> t = ParseMembers(r);
-            genPacket += string.Format(PacketFormat.packetFomat, packetName, t.Item1, t.Item2, t.Item3);
-
+            genPackets += string.Format(PacketFormat.packetFomat, packetName, t.Item1, t.Item2, t.Item3);
+            packetEnum += string.Format(PacketFormat.packetEnumFormat,packetName,++packetId) + Environment.NewLine + "\t";
         }
 
         public static Tuple<string, string, string> ParseMembers(XmlReader r)
@@ -91,8 +97,13 @@ namespace PacketGenerator
                 string memberType = r.Name.ToLower();
                 switch (memberType)
                 {
-                    case "bool":
                     case "byte":
+                    case "sbyte":
+                        memberCode += string.Format(PacketFormat.memberFormat, memberType, memberName);
+                        readCode += string.Format(PacketFormat.readByteFormat, memberName );
+                        writeCode += string.Format(PacketFormat.writeByteFormat, memberName );
+                        break;
+                    case "bool":
                     case "short":
                     case "ushort":
                     case "int":
