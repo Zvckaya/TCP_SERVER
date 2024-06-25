@@ -24,9 +24,7 @@ namespace Dummy_Client
             Console.WriteLine($"On Connected :{endPoint}");
 
             PlayerInfoReq packet = new PlayerInfoReq() { playerId = 1001, name = "ABCD" };
-            var skill = new PlayerInfoReq.Skill() { id = 105, level = 5, duration = 3.0f };
-            skill.attributes.Add(new PlayerInfoReq.Skill.Attribute(){att=77});
-            packet.skills.Add(skill);
+         
             packet.skills.Add(new PlayerInfoReq.Skill() { id = 101, level = 1, duration = 3.0f });
             packet.skills.Add(new PlayerInfoReq.Skill() { id = 102, level = 2, duration = 3.0f });
             packet.skills.Add(new PlayerInfoReq.Skill() { id = 103, level = 3, duration = 3.0f });

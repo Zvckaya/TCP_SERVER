@@ -15,6 +15,7 @@ namespace Tcp_Server
 
         static void Main(string[] args)
         {
+            PacketManager.Instance.Register(); //멀티스레드 개입전 Register
             string host = Dns.GetHostName();
             IPHostEntry ipHost = Dns.GetHostEntry(host);
             IPAddress ipAddr = ipHost.AddressList[0];
