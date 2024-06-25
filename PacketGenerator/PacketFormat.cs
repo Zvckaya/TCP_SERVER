@@ -20,10 +20,19 @@ using System.Text;
 using System.Threading.Tasks;
 using Tcp_Server_Core;
 
-public enum PacketID
+public enum PacketID 
 {{
     {0}
 }}
+
+interface IPacket
+{{
+	ushort Protocol {{ get; }}
+	void Read(ArraySegment<byte> segment);
+	ArraySegment<byte> Write();
+}}
+
+
 
 {1}
 
@@ -43,9 +52,11 @@ public enum PacketID
 
         public static string packetFomat =
 @"
-public class {0}
+public class {0} : IPacket
 {{
     {1}
+
+public ushort Protocol {{ get {{ return (ushort)PacketID.{0}; }} }}
 
     public  void Read(ArraySegment<byte> segment)
     {{
