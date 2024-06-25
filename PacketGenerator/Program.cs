@@ -15,14 +15,13 @@ namespace PacketGenerator
                 IgnoreWhitespace = true,
             };
 
-            using (XmlReader r = XmlReader.Create("PDL.xml", setting))
+            using (XmlReader r = XmlReader.Create("PDLibray.xml", setting))
             {
                 r.MoveToContent();
                 while (r.Read())
                 {
                     if (r.Depth == 1 && r.NodeType == XmlNodeType.Element)
                         ParsePack(r);
-
                 }
 
                 File.WriteAllText("GenPackets.cs", genPacket);
@@ -103,13 +102,17 @@ namespace PacketGenerator
                         memberCode += string.Format(PacketFormat.memberFormat, memberType, memberName);
                         readCode += string.Format(PacketFormat.readFormat, memberName, ToMemberType(memberType), memberType);
                         writeCode += string.Format(PacketFormat.writeFormat, memberName, memberType);
-                        break;  
+                        break;
                     case "string":
                         memberCode += string.Format(PacketFormat.memberFormat, memberType, memberName);
                         readCode += string.Format(PacketFormat.readStringFormat, memberName);
                         writeCode += string.Format(PacketFormat.writeStringFormat, memberName, memberType);
                         break;
                     case "list":
+                        Tuple<string,string,string> t =  ParseList(r);
+                        memberCode += t.Item1;
+                        readCode += t.Item2;
+                        writeCode += t.Item3;
                         break;
                     default:
                         break;
@@ -121,7 +124,32 @@ namespace PacketGenerator
 
             memberCode = memberCode.Replace("\n", "\n\t");
             readCode = readCode.Replace("\n", "\n\t\t");
-            writeCode = writeCode.Replace("\n","\n\t\t");
+            writeCode = writeCode.Replace("\n", "\n\t\t");
+            return new Tuple<string, string, string>(memberCode, readCode, writeCode);
+        }
+
+        public static Tuple<string, string, string> ParseList(XmlReader r)
+        {
+            string listName = r["name"];
+            if (string.IsNullOrEmpty(listName))
+            {
+                Console.WriteLine("List without name");
+                return null;
+            }
+
+            Tuple<string, string, string> t = ParseMembers(r);
+
+            string memberCode = string.Format(PacketFormat.memberListFormat, FirstCharToUpper(listName), FirstCharToLower(listName),t.Item1,t.Item2,t.Item3);
+
+            string readCode = string.Format(PacketFormat.readListFormat,
+                 FirstCharToUpper(listName), 
+                 FirstCharToLower(listName)
+                );
+
+            string writeCode = string.Format(PacketFormat.writeListFormat,
+                FirstCharToUpper(listName),
+                FirstCharToLower(listName));
+
             return new Tuple<string, string, string>(memberCode, readCode, writeCode);
         }
 
@@ -148,6 +176,19 @@ namespace PacketGenerator
 
             }
         }
+
+        public static string FirstCharToUpper(string input)
+        {
+            if (string.IsNullOrEmpty(input)) return "";
+            return input[0].ToString().ToUpper() + input.Substring(1);
+        }
+
+        public static string FirstCharToLower(string input)
+        {
+            if (string.IsNullOrEmpty(input)) return "";
+            return input[0].ToString().ToLower() + input.Substring(1);
+        }
+
 
     }
 

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <PDL>
-  <packet name="Player InfoReq">
+  <packet name="PlayerInfoReq">
     <long name="playerId" />
     <string name ="name" />
     <list name="skill">
