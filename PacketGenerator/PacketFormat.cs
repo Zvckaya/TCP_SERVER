@@ -127,8 +127,8 @@ public List<{0}> {1}s = new List<{0}>();
 count += sizeof({2});";
 
         public static string readByteFormat =
-@"this.{0} = segment.Array[segment.Offset+count];
-count += sizeof(byte);
+@"this.{0} = ({1})segment.Array[segment.Offset+count];
+count += sizeof({1});
 ";
 
         public static string readStringFormat =
@@ -165,10 +165,12 @@ success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), this.{0}
 count += sizeof({1});
 ";
 
+        //{0} 변수이름
+        //{1} 변수타입
         public static string writeByteFormat =
 @"
-segment.Array[segment.Offset + segment] = this.{0};
-count += sizeof(byte);
+segment.Array[segment.Offset + segment] = (byte)this.{0};
+count += sizeof({1});
 ";
 
 
