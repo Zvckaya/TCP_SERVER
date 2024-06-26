@@ -11,9 +11,12 @@ class PacketHandelr
     public static void PlayerInfoReqHandelr(PacketSession session, IPacket packet)
     {
         PlayerInfoReq p = packet as PlayerInfoReq;
-        if (p != null)
-        {
 
+        Console.WriteLine($"PlayerInfoReq: {p.playerId} {p.name}");
+
+        foreach(PlayerInfoReq.Skill skill in p.skills)
+        {
+            Console.WriteLine($"SKill {skill.id} {skill.level} {skill.duration}");
         }
     }
 }
