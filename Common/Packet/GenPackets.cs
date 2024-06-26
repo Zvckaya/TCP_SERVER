@@ -12,6 +12,9 @@ public enum PacketID
 PlayerInfoReq = 1,
 
 	
+Test = 2,
+
+	
 }
 
 interface IPacket
@@ -129,6 +132,53 @@ public class PlayerInfoReq : IPacket
 		{
 		    success &= skill.Write(s, ref count);
 		}
+		
+
+        success &= BitConverter.TryWriteBytes(s, count); // 사이즈 적어주기
+
+        if (success == false)
+            return null;
+
+        //복사배열 생성이 아닌 미리 만들어진 버퍼로 관리
+        ArraySegment<byte> sendBuff = SendBufferHelper.Close(count);
+        return sendBuff;
+    }
+}
+
+public class Test : IPacket
+{
+    public int testInt;
+
+    public ushort Protocol { get { return (ushort)PacketID.Test; } }
+
+    public  void Read(ArraySegment<byte> segment)
+    {
+
+        ushort count = 0;
+
+        ReadOnlySpan<byte> s = new ReadOnlySpan<byte>(segment.Array, segment.Offset, segment.Count);
+        count += sizeof(ushort);
+        count += sizeof(ushort);
+         this.testInt = BitConverter.ToInt32(s.Slice(count, s.Length - count));
+		count += sizeof(int);
+
+    }
+         
+    public  ArraySegment<byte> Write()
+    {
+        ArraySegment<byte> segment = SendBufferHelper.Open(4096); //사이즈 예약
+        bool success = true;
+        ushort count = 0;
+
+        Span<byte> s = new Span<byte>(segment.Array, segment.Offset, segment.Count);
+        
+        count += sizeof(ushort);
+        success &= BitConverter.TryWriteBytes(s.Slice(count,s.Length - count), (ushort)PacketID.Test); 
+        count += sizeof(ushort);
+
+        
+		success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), this.testInt); 
+		count += sizeof(int);
 		
 
         success &= BitConverter.TryWriteBytes(s, count); // 사이즈 적어주기

@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using Tcp_Server_Core;
 
 
-class PacketHandelr
+class PacketHandler
 {
-    public static void PlayerInfoReqHandelr(PacketSession session, IPacket packet)
+    public static void PlayerInfoReqHandler(PacketSession session, IPacket packet)
     {
         PlayerInfoReq p = packet as PlayerInfoReq;
 
