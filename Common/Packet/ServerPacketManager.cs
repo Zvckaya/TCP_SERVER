@@ -26,10 +26,6 @@ class PacketManager
         _handler.Add((ushort)PacketID.C_PlayerInfoReq, PacketHandler.C_PlayerInfoReqHandler);
 
 
-        _onRecv.Add((ushort)PacketID.S_Test, MakePacket<S_Test>);
-        _handler.Add((ushort)PacketID.S_Test, PacketHandler.S_TestHandler);
-
-
     }
 
     public void OnRecvPacket(PacketSession session, ArraySegment<byte> buffer)

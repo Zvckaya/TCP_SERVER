@@ -8,16 +8,13 @@ using Tcp_Server_Core;
 
 class PacketHandler
 {
-    public static void PlayerInfoReqHandler(PacketSession session, IPacket packet)
+    public static void S_TestHandler(PacketSession session, IPacket packet)
     {
-        PlayerInfoReq p = packet as PlayerInfoReq;
+        S_Test p = packet as S_Test;
 
-        Console.WriteLine($"PlayerInfoReq: {p.playerId} {p.name}");
+        Console.WriteLine($"PlayerInfoReq: {p.testInt} ");
 
-        foreach (PlayerInfoReq.Skill skill in p.skills)
-        {
-            Console.WriteLine($"SKill {skill.id} {skill.level} {skill.duration}");
-        }
+
     }
 }
 

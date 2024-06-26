@@ -10,7 +10,8 @@ namespace PacketGenerator
         static ushort packetId;
         static string packetEnum;
 
-        static string managerRegister;
+        static string clientRegister;
+        static string serverRegister;
 
 
         static void Main(string[] args)
@@ -40,8 +41,10 @@ namespace PacketGenerator
 
                 string fileText = string.Format(PacketFormat.fileFormat, packetEnum, genPackets);
                 File.WriteAllText("GenPackets.cs", fileText);
-                string managerText = string.Format(PacketFormat.managerFormat, managerRegister);
-                File.WriteAllText("PacketManager.cs", managerText);
+                string clientManagerText = string.Format(PacketFormat.managerFormat, clientRegister);
+                File.WriteAllText("ClientPacketManager.cs", clientManagerText);
+                string serverManagerText = string.Format(PacketFormat.managerFormat, serverRegister);
+                File.WriteAllText("ServerPacketManager.cs", serverManagerText);
             }
         }
 
@@ -66,7 +69,11 @@ namespace PacketGenerator
             Tuple<string, string, string> t = ParseMembers(r);
             genPackets += string.Format(PacketFormat.packetFomat, packetName, t.Item1, t.Item2, t.Item3);
             packetEnum += string.Format(PacketFormat.packetEnumFormat,packetName,++packetId) + Environment.NewLine + "\t";
-            managerRegister += string.Format(PacketFormat.managerRegisterFormat, packetName) + Environment.NewLine;
+            if (packetName.StartsWith("S_") || packetName.StartsWith("s_"))
+                clientRegister += string.Format(PacketFormat.managerRegisterFormat, packetName) + Environment.NewLine;
+            else
+                serverRegister += string.Format(PacketFormat.managerRegisterFormat, packetName) + Environment.NewLine;
+
         }
 
         public static Tuple<string, string, string> ParseMembers(XmlReader r)
