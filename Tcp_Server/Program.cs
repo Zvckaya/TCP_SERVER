@@ -15,6 +15,7 @@ namespace Tcp_Server
 
         static void Main(string[] args)
         {
+            PacketManager.Instanc.Register();
             string host = Dns.GetHostName();
             IPHostEntry ipHost = Dns.GetHostEntry(host);
             IPAddress ipAddr = ipHost.AddressList[0];
