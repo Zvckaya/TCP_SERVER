@@ -71,7 +71,7 @@ public class PlayerInfoReq : IPacket
 	public List<Skill> skills = new List<Skill>();
 	
 
-public ushort Protocol { get { return (ushort)PacketID.PlayerInfoReq; } }
+    public ushort Protocol { get { return (ushort)PacketID.PlayerInfoReq; } }
 
     public  void Read(ArraySegment<byte> segment)
     {

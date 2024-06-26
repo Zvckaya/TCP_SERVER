@@ -56,7 +56,7 @@ public class {0} : IPacket
 {{
     {1}
 
-public ushort Protocol {{ get {{ return (ushort)PacketID.{0}; }} }}
+    public ushort Protocol {{ get {{ return (ushort)PacketID.{0}; }} }}
 
     public  void Read(ArraySegment<byte> segment)
     {{
