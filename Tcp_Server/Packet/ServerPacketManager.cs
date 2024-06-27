@@ -3,19 +3,17 @@ using Tcp_Server_Core;
 
 class PacketManager
 {
-    #region Singleton
-    static PacketManager _instance;
+   #region Singleton
+    static PacketManager _instance = new PacketManager();
     public static PacketManager Instanc
     {
-        get
-        {
-            if (_instance == null)
-                _instance = new PacketManager();
-            return _instance;
-             
-        }
+       get { return _instance; }
     }
 
+    PacketManager()
+    {
+        Register();
+    }
     #endregion
 
     Dictionary<ushort, Action<PacketSession, ArraySegment<byte>>> _onRecv = new Dictionary<ushort, Action<PacketSession, ArraySegment<byte>>>();
@@ -24,8 +22,8 @@ class PacketManager
     public void Register()
     {
         
-        _onRecv.Add((ushort)PacketID.C_PlayerInfoReq, MakePacket<C_PlayerInfoReq>);
-        _handler.Add((ushort)PacketID.C_PlayerInfoReq, PacketHandler.C_PlayerInfoReqHandler);
+        _onRecv.Add((ushort)PacketID.C_Chat, MakePacket<C_Chat>);
+        _handler.Add((ushort)PacketID.C_Chat, PacketHandler.C_ChatHandler);
 
 
     }

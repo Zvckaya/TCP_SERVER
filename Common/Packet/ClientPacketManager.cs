@@ -1,19 +1,17 @@
 
 class PacketManager
 {
-    #region Singleton
-    static PacketManager _instance;
+   #region Singleton
+    static PacketManager _instance = new PacketManager();
     public static PacketManager Instanc
     {
-        get
-        {
-            if (_instance == null)
-                _instance = new PacketManager();
-            return _instance;
-             
-        }
+       get { return _instance; }
     }
 
+    PacketManager()
+    {
+        Register();
+    }
     #endregion
 
     Dictionary<ushort, Action<PacketSession, ArraySegment<byte>>> _onRecv = new Dictionary<ushort, Action<PacketSession, ArraySegment<byte>>>();
@@ -22,8 +20,8 @@ class PacketManager
     public void Register()
     {
         
-        _onRecv.Add((ushort)PacketID.S_Test, MakePacket<S_Test>);
-        _handler.Add((ushort)PacketID.S_Test, PacketHandler.S_TestHandler);
+        _onRecv.Add((ushort)PacketID.S_Chat, MakePacket<S_Chat>);
+        _handler.Add((ushort)PacketID.S_Chat, PacketHandler.S_ChatHandler);
 
 
     }
