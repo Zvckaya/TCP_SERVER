@@ -24,17 +24,20 @@ namespace Tcp_Server.Session
 
             Console.WriteLine($"OnConnected : {endPoint}");
 
-            Program.Room.Enter(this);
+            Program.Room.Push(() => Program.Room.Enter(this));
 
         }
 
         public override void OnDisconnected(EndPoint endPoint)
         {
             Console.WriteLine($"On Disconnected :{endPoint}");
-            if (Room != null) {
-                Room.Leave(this);
-            }
+
             SessionManager.instance.Remove(this);
+            if (Room != null) {
+                GameRoom room = Room;
+                room.Push(() => room.Leave(this));
+                Room = null;
+            }
         }
 
 

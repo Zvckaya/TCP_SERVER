@@ -15,9 +15,12 @@ class PacketHandler
         C_Chat chatPacket = packet as C_Chat;
         ClientSession clientSession = session as ClientSession;
 
+        if (clientSession.Room == null)
+            return;
 
-        GameRoom room = clientSession.Room;
-        room.BroadCast(clientSession, chatPacket.chat);
+        //jobqueue이용 
+        clientSession.Room.Push(
+            () => { clientSession.Room.BroadCast(clientSession, chatPacket.chat); });
 
 
     }

@@ -4,13 +4,21 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Tcp_Server.Session;
+using Tcp_Server_Core;
 
 namespace Tcp_Server
 {
-    class GameRoom
+    class GameRoom : IJobQueue
     {
         List<ClientSession> _sessions = new List<ClientSession>();
         object _lock = new object();
+        JobQueue _jobQueue = new JobQueue();
+
+        public void Push(Action job)
+        {
+            _jobQueue.Push(job);
+        }
+
 
         public void BroadCast(ClientSession session,string chat)
         {
@@ -30,23 +38,20 @@ namespace Tcp_Server
 
         public void Enter(ClientSession session)
         {
-            lock (_lock)
-            {
+         
                 _sessions.Add(session);
                 session.Room = this;
-            }
-  
+            
 
         }
 
         public void Leave(ClientSession session)
         {
-            lock (_lock)
-            {
+          
                 _sessions.Remove(session);
-            }
+            
         }
 
-
+       
     }
 }
