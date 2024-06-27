@@ -16,16 +16,15 @@ namespace Tcp_Server
         {
             S_Chat packet = new S_Chat();
             packet.playerId = session.SessionId;
-            packet.chat = chat;
+            packet.chat = chat + $" I am {packet.playerId}";
             ArraySegment<byte> segment = packet.Write();
 
-            lock (_lock)  // 공유하는 _sessions 를 다룰 때는 lock
-            {
+            
                 foreach(ClientSession s in _sessions)
                 {
                     s.Send(segment);
                 }
-            }
+            
 
         }
 

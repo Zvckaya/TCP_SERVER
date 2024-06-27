@@ -5,7 +5,7 @@ class PacketManager
 {
    #region Singleton
     static PacketManager _instance = new PacketManager();
-    public static PacketManager Instanc
+    public static PacketManager Instance
     {
        get { return _instance; }
     }

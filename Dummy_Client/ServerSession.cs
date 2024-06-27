@@ -10,9 +10,7 @@ using Tcp_Server_Core;
 namespace Dummy_Client
 {  //세션은 대리자의 개념이다.
 
-   
-
-
+ 
     class ServerSession : PacketSession
     {
         public override void OnConnected(EndPoint endPoint)
@@ -28,7 +26,7 @@ namespace Dummy_Client
 
         public override void OnRecvPacket(ArraySegment<byte> buffer)
         {
-            PacketManager.Instanc.OnRecvPacket(this, buffer);
+            PacketManager.Instance.OnRecvPacket(this, buffer);
         }
 
         public override void OnSend(int numOfBytes)

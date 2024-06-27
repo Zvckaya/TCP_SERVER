@@ -10,13 +10,12 @@ namespace Tcp_Server
     class Program
     {
         static Listener _listener = new Listener();
-        static public GameRoom Room = new GameRoom();
+        public static GameRoom Room = new GameRoom();
 
 
 
         static void Main(string[] args)
         {
-
             string host = Dns.GetHostName();
             IPHostEntry ipHost = Dns.GetHostEntry(host);
             IPAddress ipAddr = ipHost.AddressList[0];

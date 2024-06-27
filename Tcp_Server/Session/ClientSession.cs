@@ -10,22 +10,6 @@ using Tcp_Server_Core;
 namespace Tcp_Server.Session
 {
 
-    public abstract class Packet  //패킷 헤더
-    {
-        public ushort size;
-        public ushort packetId;
-
-        public abstract ArraySegment<byte> Write();
-        public abstract void Read(ArraySegment<byte> s);
-    }
-
-
-    public enum PacketID
-    {
-
-        PlayerInfoReq = 1,
-        Test = 2,
-    }
 
     class ClientSession : PacketSession
     {
@@ -56,7 +40,7 @@ namespace Tcp_Server.Session
 
         public override void OnRecvPacket(ArraySegment<byte> buffer)
         {
-            PacketManager.Instanc.OnRecvPacket(this, buffer);
+            PacketManager.Instance.OnRecvPacket(this, buffer);
         }
 
         public override void OnSend(int numOfBytes)
