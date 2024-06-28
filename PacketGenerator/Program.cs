@@ -42,9 +42,9 @@ namespace PacketGenerator
                 string fileText = string.Format(PacketFormat.fileFormat, packetEnum, genPackets);
                 File.WriteAllText("GenPackets.cs", fileText);
                 string clientManagerText = string.Format(PacketFormat.managerFormat, clientRegister);
-                File.WriteAllText("ClientPacketManager.cs", clientManagerText);
+                File.WriteAllText("ClientPacketManager.cs", clientManagerText); // 클라이언트 패킷 매니저 잓성
                 string serverManagerText = string.Format(PacketFormat.managerFormat, serverRegister);
-                File.WriteAllText("ServerPacketManager.cs", serverManagerText);
+                File.WriteAllText("ServerPacketManager.cs", serverManagerText); // 서버 패킷 매니저 작성
             }
         }
 
@@ -70,7 +70,7 @@ namespace PacketGenerator
             genPackets += string.Format(PacketFormat.packetFomat, packetName, t.Item1, t.Item2, t.Item3);
             packetEnum += string.Format(PacketFormat.packetEnumFormat,packetName,++packetId) + Environment.NewLine + "\t";
             if (packetName.StartsWith("S_") || packetName.StartsWith("s_"))
-                clientRegister += string.Format(PacketFormat.managerRegisterFormat, packetName) + Environment.NewLine;
+                clientRegister += string.Format(PacketFormat.managerRegisterFormat, packetName) + Environment.NewLine; //실제 포맷작업
             else
                 serverRegister += string.Format(PacketFormat.managerRegisterFormat, packetName) + Environment.NewLine;
 
@@ -155,7 +155,7 @@ namespace PacketGenerator
             memberCode = memberCode.Replace("\n", "\n\t");
             readCode = readCode.Replace("\n", "\n\t\t");
             writeCode = writeCode.Replace("\n", "\n\t\t");
-            return new Tuple<string, string, string>(memberCode, readCode, writeCode);
+            return new Tuple<string, string, string>(memberCode, readCode, writeCode);  // 합치기 
         }
 
         public static Tuple<string, string, string> ParseList(XmlReader r)
