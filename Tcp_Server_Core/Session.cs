@@ -15,6 +15,7 @@ namespace Tcp_Server_Core
         public sealed override int OnRecv(ArraySegment<byte> buffer)  // sealed를 사용하면 override를 사용할 수 없다.
         {
             int processLen = 0;
+            int packetCount = 0;
 
             while (true)
             {
@@ -29,12 +30,15 @@ namespace Tcp_Server_Core
 
                 //패킷 조립 가능
                 OnRecvPacket(new ArraySegment<byte>(buffer.Array,buffer.Offset,dataSize)); //ArraySegment는 구조체임, 즉 스택에 복사를함
-                
+                packetCount++;
+
                 processLen += dataSize;
                 buffer = new ArraySegment<byte>(buffer.Array, buffer.Offset + dataSize, buffer.Count - dataSize);
             }
 
-           
+            if(packetCount > 1)
+                Console.WriteLine($"패킷 모아보내기:{packetCount}");
+
             return processLen;
         }
         public abstract void OnRecvPacket(ArraySegment<byte> buffer);
@@ -44,7 +48,7 @@ namespace Tcp_Server_Core
     {
         Socket _socket;
         int _disconnected = 0;
-        RecvBuffer _recvBuffer = new RecvBuffer(1024);
+        RecvBuffer _recvBuffer = new RecvBuffer(65535);
 
 
         Queue<ArraySegment<byte>> _sendQueue = new Queue<ArraySegment<byte>>();
@@ -78,6 +82,24 @@ namespace Tcp_Server_Core
 
             RegisterRecv();
 
+        }
+
+        public void Send(List<ArraySegment<byte>> sendBuffList)
+        {
+            if (sendBuffList.Count == 0)
+                return;
+
+            lock (_lock)  //동시에 Send를 호출 했을때, 큐에 넣는 작업을 동기화 시킴
+            {
+                foreach (ArraySegment<byte> sendBuff in sendBuffList)
+                {
+                    _sendQueue.Enqueue(sendBuff);
+                }
+                
+                if (_pendingList.Count == 0) //보내는중이 아니라면, 보내기 시작
+                    RegisterSend();
+
+            }
         }
 
         public void Send(ArraySegment<byte> sendBuff)

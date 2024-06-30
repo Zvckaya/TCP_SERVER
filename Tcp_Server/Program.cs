@@ -27,7 +27,9 @@ namespace Tcp_Server
 
             while (true)
             {
-                ;
+                Room.Push(() => Room.Flush());
+                Thread.Sleep(250);
+                
             }
 
 

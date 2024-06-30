@@ -13,18 +13,23 @@ namespace Tcp_Server_Core
         Socket _listenSocket;
         Func<Session> _sessionFactory;
 
-        public void Init(IPEndPoint endPoint, Func<Session> sessionFactory)
+        public void Init(IPEndPoint endPoint, Func<Session> sessionFactory,int register = 10 , int backlog = 100)
         {
 
             _listenSocket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             _sessionFactory += sessionFactory;
 
             _listenSocket.Bind(endPoint);
-            _listenSocket.Listen(10);  //10개의 리스너 생성제한으로 pending false만 나올수가 없음.
+            _listenSocket.Listen(backlog);  //10개의 리스너 생성제한으로 pending false만 나올수가 없음.
 
-            SocketAsyncEventArgs args = new SocketAsyncEventArgs();
-            args.Completed += new EventHandler<SocketAsyncEventArgs>(OnAcceptCompleted);
-            RegisterAccept(args);
+
+            for(int i=0; i < register; i++)
+            {
+                SocketAsyncEventArgs args = new SocketAsyncEventArgs();
+                args.Completed += new EventHandler<SocketAsyncEventArgs>(OnAcceptCompleted);
+                RegisterAccept(args);
+            }
+            
         }
 
         void RegisterAccept(SocketAsyncEventArgs args)
